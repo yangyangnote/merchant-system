@@ -1,0 +1,19 @@
+Server running on port 3001
+Server running on port 3001
+/Users/mac/袁记商家系统/server.js:12
+const wxpay = new WxPay({
+              ^
+
+TypeError: WxPay is not a constructor
+    at Object.<anonymous> (/Users/mac/袁记商家系统/server.js:12:15)
+    at Module._compile (node:internal/modules/cjs/loader:1723:14)
+    at Object..js (node:internal/modules/cjs/loader:1888:10)
+    at Module.load (node:internal/modules/cjs/loader:1458:32)
+    at Function._load (node:internal/modules/cjs/loader:1275:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:234:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:151:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v23.7.0
+Server running on port 3001

@@ -1,0 +1,10 @@
+{
+  "merchant1": [
+    { "name": "牛肉", "price": 31, "stock": 100 },
+    { "name": "猪肉", "price": 30, "stock": 80 }
+  ],
+  "merchant2": [
+    { "name": "鸡肉", "price": 28, "stock": 50 },
+    { "name": "鱼肉", "price": 35, "stock": 60 }
+  ]
+} 

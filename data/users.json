@@ -1,0 +1,5 @@
+[
+  { "id": "merchant1", "username": "商家A", "password": "123456", "role": "merchant" },
+  { "id": "merchant2", "username": "商家B", "password": "123456", "role": "merchant" },
+  { "id": "supplier1", "username": "供应商A", "password": "123456", "role": "supplier" }
+] 
