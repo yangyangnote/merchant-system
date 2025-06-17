@@ -30,8 +30,8 @@ export default function OrderForm({ onOrder }) {
 
   const handleSelect = (id) => {
     const item = menu.find(m => m.id === id || m.name === id);
-    if (!selected.find(s => s.id === id || s.name === id)) {
-      setSelected([...selected, { ...item, quantity: 1 }]);
+    if (item && !selected.find(s => s.id === id || s.name === id)) {
+      setSelected([...selected, { ...item, price: Number(item.price), quantity: 1 }]);
     }
   };
 
@@ -55,7 +55,7 @@ export default function OrderForm({ onOrder }) {
     fetch('http://localhost:3001/api/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: selected.map(({name, quantity}) => `${name}*${quantity}`), address: values.address, phone: values.phone, userId, username })
+      body: JSON.stringify({ items: selected, address: values.address, phone: values.phone, userId, username })
     }).then(() => {
       setSelected([]);
       setAddress('');

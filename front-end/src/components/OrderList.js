@@ -50,7 +50,11 @@ export default function OrderList({ refresh, userId }) {
               bodyStyle={{ padding: 16 }}
             >
               <Space direction="vertical" style={{ width: '100%' }}>
-                <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>{order.items.join(', ')}</div>
+                <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>
+                  {JSON.parse(order.items).map(item => 
+                    `${item.name} x ${item.quantity} (￥${item.price.toFixed(2)})`
+                  ).join(', ')}
+                </div>
                 <div style={{ color: '#666' }}>地址：{order.address}</div>
                 <div style={{ color: '#666' }}>电话：{order.phone}</div>
                 <div>{renderStatusButton(order)}</div>
