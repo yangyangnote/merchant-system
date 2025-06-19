@@ -4,18 +4,18 @@ import { List, Card, Button, Tag, Space, message } from 'antd';
 export default function OrderList({ refresh, userId }) {
   const [orders, setOrders] = useState([]);
   useEffect(() => {
-    fetch(`http://localhost:3001/api/order?userId=${userId}`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/order?userId=${userId}`)
       .then(res => res.json())
       .then(setOrders);
   }, [refresh, userId]);
 
   const handleCancel = id => {
-    fetch(`http://localhost:3001/api/order/cancel/${id}`, { method: 'POST' })
+    fetch(`${process.env.REACT_APP_API_URL}/api/order/cancel/${id}`, { method: 'POST' })
       .then(() => setOrders(orders => orders.filter(o => o.id !== id)));
   };
 
   const handlePay = id => {
-    fetch(`http://localhost:3001/api/order/pay/${id}`, { method: 'POST' })
+    fetch(`${process.env.REACT_APP_API_URL}/api/order/pay/${id}`, { method: 'POST' })
       .then(() => setOrders(orders => orders.map(o => o.id === id ? { ...o, status: '已支付' } : o)));
   };
 

@@ -6,7 +6,7 @@ export default function SupplierPanel() {
   const [logistics, setLogistics] = useState({});
 
   const fetchOrders = () => {
-    fetch('http://localhost:3001/api/order')
+    fetch(`${process.env.REACT_APP_API_URL}/api/order`)
       .then(res => res.json())
       .then(setOrders);
   };
@@ -16,7 +16,7 @@ export default function SupplierPanel() {
   }, []);
 
   const updateOrder = (id, api, body) => {
-    fetch(`http://localhost:3001/api/supplier/${api}/${id}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/api/supplier/${api}/${id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined

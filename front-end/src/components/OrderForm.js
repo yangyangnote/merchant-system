@@ -11,7 +11,7 @@ export default function OrderForm({ onOrder }) {
   const username = localStorage.getItem('username');
 
   useEffect(() => {
-    fetch(`http://localhost:3001/api/menu?userId=${userId}`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/menu?userId=${userId}`)
       .then(res => res.json())
       .then(setMenu);
     // 读取历史地址
@@ -52,7 +52,7 @@ export default function OrderForm({ onOrder }) {
       message.error('请填写完整信息并选择商品');
       return;
     }
-    fetch('http://localhost:3001/api/order', {
+    fetch(`${process.env.REACT_APP_API_URL}/api/order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: selected, address: values.address, phone: values.phone, userId, username })

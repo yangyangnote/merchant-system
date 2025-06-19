@@ -6,7 +6,7 @@ export default function MenuSelect() {
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    fetch(`http://localhost:3001/api/menu?userId=${userId}`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/menu?userId=${userId}`)
       .then(res => res.json())
       .then(setMenu);
   }, [userId]);
