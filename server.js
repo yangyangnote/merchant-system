@@ -7,7 +7,32 @@ const pool = require('./db'); // 引入 db.js 模块
 // const { WxPay } = require('wechatpay-node-v3');
 
 const app = express();
-app.use(cors());
+
+// CORS 配置 - 支持开发和生产环境
+const corsOptions = {
+  origin: function (origin, callback) {
+    // 允许的域名列表
+    const allowedOrigins = [
+      'http://localhost:3000',           // 开发环境
+      'https://merchant-system-blush.vercel.app', // 生产环境
+      // 如果需要支持自定义域名，在这里添加
+    ];
+    
+    // 允许无origin的请求（如移动应用、Postman等）
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('不允许的跨域请求'));
+    }
+  },
+  credentials: true, // 支持发送cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // const wxpay = new WxPay({
@@ -29,8 +54,8 @@ app.post('/api/login', async (req, res) => {
     );
     if (rows.length > 0) {
       const user = rows[0];
-      res.json({ success: true, userId: user.id, role: user.role, username: user.username });
-    } else {
+    res.json({ success: true, userId: user.id, role: user.role, username: user.username });
+  } else {
       res.json({ success: false, message: '用户名、密码或角色错误' });
     }
   } catch (error) {
@@ -125,9 +150,9 @@ app.post('/api/order/pay/:id', async (req, res) => {
       ['已支付', id, '未支付']
     );
     if (result.affectedRows > 0) {
-      res.json({ success: true, message: '支付成功' });
-    } else {
-      res.json({ success: false, message: '订单已支付或不存在' });
+    res.json({ success: true, message: '支付成功' });
+  } else {
+    res.json({ success: false, message: '订单已支付或不存在' });
     }
   } catch (error) {
     console.error('支付订单失败:', error);
@@ -196,9 +221,9 @@ app.post('/api/supplier/finish/:id', async (req, res) => {
       ['已完成', id, '已支付']
     );
     if (result.affectedRows > 0) {
-      res.json({ success: true, message: '订单已完成' });
-    } else {
-      res.json({ success: false, message: '订单不是已支付状态或不存在' });
+    res.json({ success: true, message: '订单已完成' });
+  } else {
+    res.json({ success: false, message: '订单不是已支付状态或不存在' });
     }
   } catch (error) {
     console.error('确认收货失败:', error);

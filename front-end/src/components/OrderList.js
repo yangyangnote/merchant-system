@@ -54,7 +54,7 @@ export default function OrderList({ refresh, userId }) {
                   {JSON.parse(order.items).map(item => 
                     `${item.name} x ${item.quantity} (￥${item.price.toFixed(2)})`
                   ).join(', ')}
-                </div>
+    </div>
                 <div style={{ color: '#666' }}>地址：{order.address}</div>
                 <div style={{ color: '#666' }}>电话：{order.phone}</div>
                 <div>{renderStatusButton(order)}</div>

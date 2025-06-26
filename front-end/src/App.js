@@ -33,18 +33,18 @@ function App() {
   const isSupplier = role === 'supplier';
 
   if (role === 'merchant') {
-    return (
-      <div style={{ maxWidth: 700, margin: '0 auto', padding: 24 }}>
-        <div style={{ marginBottom: 24 }}>
+  return (
+    <div style={{ maxWidth: 700, margin: '0 auto', padding: 24 }}>
+      <div style={{ marginBottom: 24 }}>
           <span style={{ float: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 18, color: '#222', fontWeight: 500 }}>{userId}</span>
             <button onClick={handleLogout} style={{ borderRadius: 8, border: '1px solid #bbb', padding: '4px 16px', background: '#fafbfc', cursor: 'pointer', fontSize: 16 }}>退出</button>
-          </span>
-        </div>
-        <h1>商家界面</h1>
-        <MenuSelect />
-        <OrderForm onOrder={() => setRefresh(!refresh)} />
-        <OrderList refresh={refresh} userId={userId} />
+        </span>
+      </div>
+          <h1>商家界面</h1>
+          <MenuSelect />
+          <OrderForm onOrder={() => setRefresh(!refresh)} />
+          <OrderList refresh={refresh} userId={userId} />
       </div>
     );
   }

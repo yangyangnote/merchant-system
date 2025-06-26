@@ -90,11 +90,11 @@ export default function OrderForm({ onOrder }) {
             style={{ borderRadius: 8 }}
           >
             <Select.Option value="">请选择</Select.Option>
-            {menu.map(item => (
+          {menu.map(item => (
               <Select.Option key={item.id || item.name} value={item.id || item.name}>
                 {item.name} - ￥{item.price}
               </Select.Option>
-            ))}
+          ))}
           </Select>
         </Form.Item>
         {selected.length > 0 && (
@@ -107,7 +107,7 @@ export default function OrderForm({ onOrder }) {
                   <span>单价: ￥{item.price}</span>
                   <InputNumber min={1} value={item.quantity} onChange={v => handleQuantityChange(item.id, v)} style={{ width: 60, borderRadius: 8 }} />
                   <Button type="link" danger onClick={() => handleRemove(item.id)}>移除</Button>
-                  <span style={{ marginLeft: 8 }}>小计: ￥{item.price * item.quantity}</span>
+            <span style={{ marginLeft: 8 }}>小计: ￥{item.price * item.quantity}</span>
                 </Space>
               </List.Item>
             )}

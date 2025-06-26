@@ -22,7 +22,7 @@ export default function MenuSelect() {
             <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>{item.name}</div>
             <div style={{ color: '#666', marginLeft: 8 }}>
               <Tag color="blue" style={{ borderRadius: 8, marginRight: 8 }}>￥{item.price}</Tag>
-            </div>
+    </div>
           </List.Item>
         )}
       />

@@ -9,15 +9,15 @@ export default function Login({ onLogin }) {
     const { username, password, role } = values;
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, role })
-      });
-      const data = await res.json();
-      if (data.success) {
-        localStorage.setItem('username', data.username);
-        onLogin(data.userId, data.role);
-      } else {
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('username', data.username);
+      onLogin(data.userId, data.role);
+    } else {
         message.error(data.message || '登录失败');
       }
     } catch (e) {
@@ -62,6 +62,6 @@ export default function Login({ onLogin }) {
           </Form.Item>
         </Form>
       </Card>
-    </div>
+      </div>
   );
 } 
