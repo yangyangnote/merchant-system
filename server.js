@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const http = require('http');
 const pool = require('./db'); // 引入 db.js 模块
 // const { WxPay } = require('wechatpay-node-v3');
 
@@ -231,4 +233,42 @@ app.post('/api/supplier/finish/:id', async (req, res) => {
   }
 });
 
-app.listen(3001, () => console.log('Server running on port 3001')); 
+// HTTPS 配置
+const HTTPS_PORT = 3443;
+const HTTP_PORT = 3001;
+
+// 检查 SSL 证书文件是否存在
+const sslKeyPath = '/etc/ssl/private/server.key';
+const sslCertPath = '/etc/ssl/certs/server.crt';
+
+// 如果有 SSL 证书，启动 HTTPS 服务器
+if (fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
+  const httpsOptions = {
+    key: fs.readFileSync(sslKeyPath),
+    cert: fs.readFileSync(sslCertPath)
+  };
+
+  https.createServer(httpsOptions, app).listen(HTTPS_PORT, () => {
+    console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
+  });
+
+  // HTTP 重定向到 HTTPS
+  const httpApp = express();
+  httpApp.use((req, res) => {
+    res.redirect(301, `https://${req.headers.host.replace(HTTP_PORT, HTTPS_PORT)}${req.url}`);
+  });
+  
+  http.createServer(httpApp).listen(HTTP_PORT, () => {
+    console.log(`HTTP Server running on port ${HTTP_PORT} (redirecting to HTTPS)`);
+  });
+} else {
+  // 如果没有 SSL 证书，只启动 HTTP 服务器
+  console.log('SSL 证书不存在，只启动 HTTP 服务器');
+  console.log('如需 HTTPS，请将证书放到:');
+  console.log(`  私钥: ${sslKeyPath}`);
+  console.log(`  证书: ${sslCertPath}`);
+  
+  app.listen(HTTP_PORT, () => {
+    console.log(`HTTP Server running on port ${HTTP_PORT}`);
+  });
+} 
