@@ -17,6 +17,7 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',           // 开发环境
       'https://merchant-system-blush.vercel.app', // 生产环境
+      'http://175.178.164.216:8080',     // 服务器前端
       // 如果需要支持自定义域名，在这里添加
     ];
     
@@ -31,7 +32,8 @@ const corsOptions = {
   },
   credentials: true, // 支持发送cookies
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200 // 支持旧版浏览器
 };
 
 app.use(cors(corsOptions));
