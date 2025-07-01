@@ -16,6 +16,7 @@ const corsOptions = {
     // 允许的域名列表
     const allowedOrigins = [
       'http://localhost:3000',           // 开发环境
+      'http://localhost:3002',           // 开发环境备用端口
       'https://merchant-system-blush.vercel.app', // 生产环境
       'http://175.178.164.216:8080',     // 服务器前端
       // 如果需要支持自定义域名，在这里添加
@@ -92,7 +93,7 @@ app.get('/api/menu', async (req, res) => {
 app.get('/api/order', async (req, res) => {
   const { userId } = req.query; // 从查询参数中获取商家ID
   try {
-    let query = 'SELECT id, items, address, phone, userId, username, status FROM orders';
+    let query = 'SELECT id, items, address, phone, contact_name, userId, username, status FROM orders';
     const params = [];
 
     if (userId) {
@@ -109,7 +110,7 @@ app.get('/api/order', async (req, res) => {
 });
 
 app.post('/api/order', async (req, res) => {
-  const { items, address, phone, userId, username } = req.body;
+  const { items, address, phone, contactName, userId, username } = req.body;
   const orderId = Date.now().toString(); // 生成唯一ID
   const status = '未支付';
 
@@ -118,10 +119,10 @@ app.post('/api/order', async (req, res) => {
     const itemsJson = JSON.stringify(items);
 
     await pool.query(
-      'INSERT INTO orders (id, items, address, phone, userId, username, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [orderId, itemsJson, address, phone, userId, username, status]
+      'INSERT INTO orders (id, items, address, phone, contact_name, userId, username, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [orderId, itemsJson, address, phone, contactName, userId, username, status]
     );
-    res.json({ success: true, id: orderId, items, address, phone, userId, username, status });
+    res.json({ success: true, id: orderId, items, address, phone, contactName, userId, username, status });
   } catch (error) {
     console.error('创建订单失败:', error);
     res.status(500).json({ success: false, message: '服务器错误，无法创建订单' });

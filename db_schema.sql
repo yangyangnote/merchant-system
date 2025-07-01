@@ -43,6 +43,7 @@ CREATE TABLE `orders` (
   `items` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `address` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `phone` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_name` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `userId` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
   `username` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -76,4 +77,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-23 14:37:00
+-- Dump completed on 2025-07-01 10:01:16

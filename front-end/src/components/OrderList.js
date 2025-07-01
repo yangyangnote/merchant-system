@@ -56,6 +56,7 @@ export default function OrderList({ refresh, userId }) {
                   ).join(', ')}
     </div>
                 <div style={{ color: '#666' }}>地址：{order.address}</div>
+                <div style={{ color: '#666' }}>联系人：{order.contact_name || '未填写'}</div>
                 <div style={{ color: '#666' }}>电话：{order.phone}</div>
                 <div>{renderStatusButton(order)}</div>
               </Space>

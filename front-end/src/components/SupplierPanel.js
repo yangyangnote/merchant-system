@@ -44,6 +44,7 @@ export default function SupplierPanel() {
                   ).join(', ')}
                 </div>
                 <div style={{ color: '#666' }}>地址：{order.address}</div>
+                <div style={{ color: '#666' }}>联系人：{order.contact_name || '未填写'}</div>
                 <div style={{ color: '#666' }}>电话：{order.phone}</div>
                 <div style={{ color: '#666' }}>下单商家: {order.username || order.userId}</div>
                 <div>
@@ -74,6 +75,7 @@ export default function SupplierPanel() {
                   ).join(', ')}
                 </div>
                 <div style={{ color: '#666' }}>地址：{order.address}</div>
+                <div style={{ color: '#666' }}>联系人：{order.contact_name || '未填写'}</div>
                 <div style={{ color: '#666' }}>电话：{order.phone}</div>
                 <div style={{ color: '#666' }}>下单商家: {order.username || order.userId}</div>
                 <div>
