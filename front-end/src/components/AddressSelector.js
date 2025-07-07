@@ -22,12 +22,13 @@ export default function AddressSelector({ value, onChange, placeholder = "点击
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/addresses/${userId}`);
       const data = await response.json();
       
-      if (response.ok) {
+      if (response.ok && Array.isArray(data)) {
         // 转换数据格式以适配现有组件结构
         const addressList = data.map(item => item.address);
         setAddresses(addressList);
       } else {
-        console.error('获取地址失败:', data.message);
+        console.error('获取地址失败:', data?.message || '未知错误');
+        setAddresses([]); // 确保addresses是数组
       }
     } catch (error) {
       console.error('获取地址失败:', error);

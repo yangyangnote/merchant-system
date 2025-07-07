@@ -17,12 +17,21 @@ export default function OrderList({ refresh, userId }) {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/order?userId=${userId}&page=${page}&pageSize=${pageSize}`);
       const result = await response.json();
       
-      if (result.data) {
+      if (result.data && Array.isArray(result.data)) {
         setOrders(result.data);
-        setPagination(result.pagination);
-      } else {
+        setPagination(result.pagination || {
+          current: 1,
+          pageSize: 10,
+          total: 0,
+          totalPages: 0
+        });
+      } else if (Array.isArray(result)) {
         // 兼容旧版本API返回格式
         setOrders(result);
+      } else {
+        // 确保orders始终是数组
+        setOrders([]);
+        console.error('订单数据格式错误:', result);
       }
     } catch (error) {
       console.error('获取订单失败:', error);
@@ -123,11 +132,18 @@ export default function OrderList({ refresh, userId }) {
               bodyStyle={{ padding: 16 }}
             >
               <Space direction="vertical" style={{ width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>
                   {JSON.parse(order.items).map(item => 
                     `${item.name} x ${item.quantity} (￥${item.price.toFixed(2)})`
                   ).join(', ')}
-                </div>
+                  </div>
+                  {order.order_no && (
+                    <div style={{ fontSize: 12, color: '#999', background: '#f5f5f5', padding: '2px 8px', borderRadius: 4 }}>
+                      订单号: {order.order_no}
+                    </div>
+                  )}
+    </div>
                 <div style={{ color: '#666' }}>地址：{order.address}</div>
                 <div style={{ color: '#666' }}>联系人：{order.contact_name || '未填写'}</div>
                 <div style={{ color: '#666' }}>电话：{order.phone}</div>
