@@ -102,19 +102,19 @@ app.get('/api/order', async (req, res) => {
     let baseQuery = 'FROM orders';
     let whereClause = '';
     const params = [];
-    
+
     if (userId) {
       whereClause = ' WHERE userId = ?';
       params.push(userId);
     }
-    
+
     // 获取总数
     const countQuery = `SELECT COUNT(*) as total ${baseQuery}${whereClause}`;
     const [countResult] = await pool.query(countQuery, params);
     const total = countResult[0].total;
     
     // 获取分页数据
-    const dataQuery = `SELECT id, items, address, phone, contact_name, userId, username, status ${baseQuery}${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`;
+    const dataQuery = `SELECT id, order_no, items, address, phone, contact_name, userId, username, status ${baseQuery}${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`;
     const [rows] = await pool.query(dataQuery, [...params, limit, offset]);
     
     // 返回分页信息
@@ -133,9 +133,20 @@ app.get('/api/order', async (req, res) => {
   }
 });
 
+// 生成专业订单号的函数
+function generateOrderNumber() {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+  const time = now.toTimeString().slice(0, 8).replace(/:/g, ''); // HHMMSS
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0'); // 3位随机数
+  
+  return `YJ${date}${time}${random}`;
+}
+
 app.post('/api/order', async (req, res) => {
   const { items, address, phone, contactName, userId, username } = req.body;
-  const orderId = Date.now().toString(); // 生成唯一ID
+  const orderId = Date.now().toString(); // 内部ID
+  const orderNo = generateOrderNumber(); // 专业订单号
   const status = '未支付';
 
   try {
@@ -143,10 +154,21 @@ app.post('/api/order', async (req, res) => {
     const itemsJson = JSON.stringify(items);
 
     await pool.query(
-      'INSERT INTO orders (id, items, address, phone, contact_name, userId, username, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [orderId, itemsJson, address, phone, contactName, userId, username, status]
+      'INSERT INTO orders (id, order_no, items, address, phone, contact_name, userId, username, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [orderId, orderNo, itemsJson, address, phone, contactName, userId, username, status]
     );
-    res.json({ success: true, id: orderId, items, address, phone, contactName, userId, username, status });
+    res.json({ 
+      success: true, 
+      id: orderId, 
+      orderNo: orderNo, 
+      items, 
+      address, 
+      phone, 
+      contactName, 
+      userId, 
+      username, 
+      status 
+    });
   } catch (error) {
     console.error('创建订单失败:', error);
     res.status(500).json({ success: false, message: '服务器错误，无法创建订单' });
@@ -186,6 +208,155 @@ app.post('/api/order/pay/:id', async (req, res) => {
   } catch (error) {
     console.error('支付订单失败:', error);
     res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 用户地址管理API
+// 获取用户地址列表
+app.get('/api/addresses/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, address, is_default, created_at FROM user_addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC',
+      [userId]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('获取地址列表失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误，无法获取地址列表' });
+  }
+});
+
+// 添加新地址
+app.post('/api/addresses', async (req, res) => {
+  const { userId, address, isDefault = false } = req.body;
+  
+  if (!userId || !address) {
+    return res.status(400).json({ success: false, message: '用户ID和地址不能为空' });
+  }
+
+  try {
+    // 如果设置为默认地址，先取消其他默认地址
+    if (isDefault) {
+      await pool.query(
+        'UPDATE user_addresses SET is_default = FALSE WHERE user_id = ?',
+        [userId]
+      );
+    }
+
+    const [result] = await pool.query(
+      'INSERT INTO user_addresses (user_id, address, is_default) VALUES (?, ?, ?)',
+      [userId, address.trim(), isDefault]
+    );
+
+    res.json({ 
+      success: true, 
+      id: result.insertId,
+      address: address.trim(),
+      isDefault,
+      message: '地址添加成功' 
+    });
+  } catch (error) {
+    console.error('添加地址失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误，无法添加地址' });
+  }
+});
+
+// 更新地址
+app.put('/api/addresses/:id', async (req, res) => {
+  const { id } = req.params;
+  const { address, isDefault } = req.body;
+  
+  if (!address) {
+    return res.status(400).json({ success: false, message: '地址不能为空' });
+  }
+
+  try {
+    // 如果设置为默认地址，先获取用户ID，然后取消其他默认地址
+    if (isDefault) {
+      const [addressInfo] = await pool.query(
+        'SELECT user_id FROM user_addresses WHERE id = ?',
+        [id]
+      );
+      
+      if (addressInfo.length > 0) {
+        await pool.query(
+          'UPDATE user_addresses SET is_default = FALSE WHERE user_id = ? AND id != ?',
+          [addressInfo[0].user_id, id]
+        );
+      }
+    }
+
+    const [result] = await pool.query(
+      'UPDATE user_addresses SET address = ?, is_default = ? WHERE id = ?',
+      [address.trim(), isDefault || false, id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ success: true, message: '地址更新成功' });
+    } else {
+      res.status(404).json({ success: false, message: '地址不存在' });
+    }
+  } catch (error) {
+    console.error('更新地址失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误，无法更新地址' });
+  }
+});
+
+// 删除地址
+app.delete('/api/addresses/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM user_addresses WHERE id = ?',
+      [id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ success: true, message: '地址删除成功' });
+    } else {
+      res.status(404).json({ success: false, message: '地址不存在' });
+    }
+  } catch (error) {
+    console.error('删除地址失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误，无法删除地址' });
+  }
+});
+
+// 设置默认地址
+app.put('/api/addresses/:id/default', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    // 获取地址的用户ID
+    const [addressInfo] = await pool.query(
+      'SELECT user_id FROM user_addresses WHERE id = ?',
+      [id]
+    );
+    
+    if (addressInfo.length === 0) {
+      return res.status(404).json({ success: false, message: '地址不存在' });
+    }
+
+    const userId = addressInfo[0].user_id;
+
+    // 取消用户的所有默认地址
+    await pool.query(
+      'UPDATE user_addresses SET is_default = FALSE WHERE user_id = ?',
+      [userId]
+    );
+
+    // 设置当前地址为默认
+    const [result] = await pool.query(
+      'UPDATE user_addresses SET is_default = TRUE WHERE id = ?',
+      [id]
+    );
+
+    res.json({ success: true, message: '默认地址设置成功' });
+  } catch (error) {
+    console.error('设置默认地址失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误，无法设置默认地址' });
   }
 });
 

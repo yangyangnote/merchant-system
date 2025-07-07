@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Select, Card, Space, List, InputNumber, message, AutoComplete } from 'antd';
+import { Form, Input, Button, Select, Card, Space, List, InputNumber, message } from 'antd';
+import AddressSelector from './AddressSelector';
 
 export default function OrderForm({ onOrder }) {
   const [menu, setMenu] = useState([]);
@@ -7,7 +8,6 @@ export default function OrderForm({ onOrder }) {
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [contactName, setContactName] = useState('');
-  const [historyAddresses, setHistoryAddresses] = useState([]);
   const userId = localStorage.getItem('userId');
   const username = localStorage.getItem('username');
 
@@ -15,19 +15,7 @@ export default function OrderForm({ onOrder }) {
     fetch(`${process.env.REACT_APP_API_URL}/api/menu?userId=${userId}`)
       .then(res => res.json())
       .then(setMenu);
-    // 读取历史地址
-    const history = JSON.parse(localStorage.getItem('historyAddresses') || '[]');
-    setHistoryAddresses(history);
   }, [userId]);
-
-  const saveHistoryAddress = (addr) => {
-    let history = JSON.parse(localStorage.getItem('historyAddresses') || '[]');
-    if (!history.includes(addr)) {
-      history = [addr, ...history].slice(0, 5); // 最多保存5个
-      localStorage.setItem('historyAddresses', JSON.stringify(history));
-      setHistoryAddresses(history);
-    }
-  };
 
   const handleSelect = (id) => {
     const item = menu.find(m => m.id === id || m.name === id);
@@ -69,7 +57,6 @@ export default function OrderForm({ onOrder }) {
       setAddress('');
       setPhone('');
       setContactName('');
-      saveHistoryAddress(values.address); // 保存历史地址
       onOrder();
       message.success('下单成功！');
     });
@@ -79,16 +66,11 @@ export default function OrderForm({ onOrder }) {
     <Card style={{ borderRadius: 16, boxShadow: '0 4px 24px rgba(94,129,244,0.06)', margin: '24px 0' }} bodyStyle={{ padding: 24 }}>
       <h2 style={{ color: '#5E81F4', fontWeight: 600, marginBottom: 24 }}>下单</h2>
       <Form layout="vertical" onFinish={handleSubmit} initialValues={{ address, phone, contactName }}>
-        <Form.Item label="地址" name="address" rules={[{ required: true, message: '请输入地址' }]}> 
-          <AutoComplete
-            style={{ width: '100%', borderRadius: 8 }}
-            options={historyAddresses.map(addr => ({ value: addr }))}
-            placeholder="请输入或选择收货地址"
+        <Form.Item label="地址" name="address" rules={[{ required: true, message: '请选择收货地址' }]}> 
+          <AddressSelector
             value={address}
             onChange={setAddress}
-            filterOption={(inputValue, option) =>
-              option.value.toLowerCase().includes(inputValue.toLowerCase())
-            }
+            placeholder="点击选择收货地址"
           />
         </Form.Item>
         <Form.Item label="选择商品">
