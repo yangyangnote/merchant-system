@@ -14,7 +14,19 @@ export default function OrderForm({ onOrder }) {
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/api/menu?userId=${userId}`)
       .then(res => res.json())
-      .then(setMenu);
+      .then(data => {
+        // 确保data是数组
+        if (Array.isArray(data)) {
+          setMenu(data);
+        } else {
+          console.error('菜单数据不是数组格式:', data);
+          setMenu([]);
+        }
+      })
+      .catch(error => {
+        console.error('获取菜单失败:', error);
+        setMenu([]);
+      });
   }, [userId]);
 
   const handleSelect = (id) => {
@@ -81,11 +93,11 @@ export default function OrderForm({ onOrder }) {
             style={{ borderRadius: 8 }}
           >
             <Select.Option value="">请选择</Select.Option>
-          {menu.map(item => (
+            {menu.map(item => (
               <Select.Option key={item.id || item.name} value={item.id || item.name}>
                 {item.name} - ￥{item.price}
               </Select.Option>
-          ))}
+            ))}
           </Select>
         </Form.Item>
         {selected.length > 0 && (
@@ -98,7 +110,7 @@ export default function OrderForm({ onOrder }) {
                   <span>单价: ￥{item.price}</span>
                   <InputNumber min={1} value={item.quantity} onChange={v => handleQuantityChange(item.id, v)} style={{ width: 60, borderRadius: 8 }} />
                   <Button type="link" danger onClick={() => handleRemove(item.id)}>移除</Button>
-            <span style={{ marginLeft: 8 }}>小计: ￥{item.price * item.quantity}</span>
+                  <span style={{ marginLeft: 8 }}>小计: ￥{item.price * item.quantity}</span>
                 </Space>
               </List.Item>
             )}
@@ -106,13 +118,15 @@ export default function OrderForm({ onOrder }) {
         )}
         <div style={{ margin: '16px 0', fontWeight: 500, fontSize: 16 }}>总金额: <span style={{ color: '#5E81F4' }}>￥{total}</span></div>
         <Form.Item label="联系人姓名" name="contactName" rules={[{ required: true, message: '请输入联系人姓名' }]}> 
-          <Input placeholder="请输入联系人姓名" value={contactName} onChange={e => setContactName(e.target.value)} style={{ borderRadius: 8 }} />
+          <Input placeholder="联系人姓名" style={{ borderRadius: 8 }} />
         </Form.Item>
         <Form.Item label="手机" name="phone" rules={[{ required: true, message: '请输入手机号' }]}> 
-          <Input placeholder="手机" value={phone} onChange={e => setPhone(e.target.value)} style={{ borderRadius: 8 }} />
+          <Input placeholder="手机" style={{ borderRadius: 8 }} />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" block style={{ borderRadius: 8 }}>下单</Button>
+          <Button type="primary" htmlType="submit" block size="large" style={{ borderRadius: 8, marginTop: 16 }}>
+            下单
+          </Button>
         </Form.Item>
       </Form>
     </Card>

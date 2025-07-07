@@ -8,7 +8,19 @@ export default function MenuSelect() {
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/api/menu?userId=${userId}`)
       .then(res => res.json())
-      .then(setMenu);
+      .then(data => {
+        // 确保data是数组
+        if (Array.isArray(data)) {
+          setMenu(data);
+        } else {
+          console.error('菜单数据不是数组格式:', data);
+          setMenu([]);
+        }
+      })
+      .catch(error => {
+        console.error('获取菜单失败:', error);
+        setMenu([]);
+      });
   }, [userId]);
 
   return (
@@ -22,7 +34,7 @@ export default function MenuSelect() {
             <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>{item.name}</div>
             <div style={{ color: '#666', marginLeft: 8 }}>
               <Tag color="blue" style={{ borderRadius: 8, marginRight: 8 }}>￥{item.price}</Tag>
-    </div>
+            </div>
           </List.Item>
         )}
       />

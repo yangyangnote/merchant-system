@@ -1,1 +1,5 @@
-Server running on port 3001
+SSL 证书不存在，只启动 HTTP 服务器
+如需 HTTPS，请将证书放到:
+  私钥: /etc/ssl/private/server.key
+  证书: /etc/ssl/certs/server.crt
+HTTP Server running on port 3001

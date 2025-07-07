@@ -28,14 +28,33 @@ export default function OrderList({ refresh, userId }) {
       } else if (Array.isArray(result)) {
         // 兼容旧版本API返回格式
         setOrders(result);
+        setPagination({
+          current: 1,
+          pageSize: result.length,
+          total: result.length,
+          totalPages: 1
+        });
       } else {
         // 确保orders始终是数组
         setOrders([]);
+        setPagination({
+          current: 1,
+          pageSize: 5,
+          total: 0,
+          totalPages: 0
+        });
         console.error('订单数据格式错误:', result);
       }
     } catch (error) {
       console.error('获取订单失败:', error);
       message.error('获取订单失败');
+      setOrders([]);
+      setPagination({
+        current: 1,
+        pageSize: 5,
+        total: 0,
+        totalPages: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -133,10 +152,22 @@ export default function OrderList({ refresh, userId }) {
             >
               <Space direction="vertical" style={{ width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>
-                  {JSON.parse(order.items).map(item => 
-                    `${item.name} x ${item.quantity} (￥${item.price.toFixed(2)})`
-                  ).join(', ')}
+                  <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>
+                    {(() => {
+                      try {
+                        const items = JSON.parse(order.items);
+                        if (Array.isArray(items)) {
+                          return items.map(item => 
+                            `${item.name} x ${item.quantity} (￥${Number(item.price).toFixed(2)})`
+                          ).join(', ');
+                        } else {
+                          return '订单商品信息错误';
+                        }
+                      } catch (error) {
+                        console.error('解析订单商品失败:', error);
+                        return '订单商品信息错误';
+                      }
+                    })()}
                   </div>
                   {order.order_no && (
                     <div style={{ fontSize: 12, color: '#999', background: '#f5f5f5', padding: '2px 8px', borderRadius: 4 }}>

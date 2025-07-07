@@ -1,0 +1,16 @@
+[Unit]
+Description=Merchant System Node.js App
+After=network.target
+
+[Service]
+Type=forking
+User=root
+WorkingDirectory=/root/merchant-system
+ExecStart=/usr/bin/pm2 start ecosystem.config.js --no-daemon
+ExecReload=/usr/bin/pm2 reload ecosystem.config.js
+ExecStop=/usr/bin/pm2 kill
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target 

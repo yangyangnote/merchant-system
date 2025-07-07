@@ -32,6 +32,7 @@ export default function AddressSelector({ value, onChange, placeholder = "点击
       }
     } catch (error) {
       console.error('获取地址失败:', error);
+      setAddresses([]);
     } finally {
       setLoading(false);
     }

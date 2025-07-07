@@ -17,16 +17,43 @@ export default function SupplierPanel() {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/order?page=${page}&pageSize=${pageSize}`);
       const result = await response.json();
       
-      if (result.data) {
+      if (result.data && Array.isArray(result.data)) {
         setOrders(result.data);
-        setPagination(result.pagination);
-      } else {
+        setPagination(result.pagination || {
+          current: 1,
+          pageSize: 20,
+          total: 0,
+          totalPages: 0
+        });
+      } else if (Array.isArray(result)) {
         // 兼容旧版本API
         setOrders(result);
+        setPagination({
+          current: 1,
+          pageSize: result.length,
+          total: result.length,
+          totalPages: 1
+        });
+      } else {
+        setOrders([]);
+        setPagination({
+          current: 1,
+          pageSize: 20,
+          total: 0,
+          totalPages: 0
+        });
+        console.error('订单数据格式错误:', result);
       }
     } catch (error) {
       console.error('获取订单失败:', error);
       message.error('获取订单失败');
+      setOrders([]);
+      setPagination({
+        current: 1,
+        pageSize: 20,
+        total: 0,
+        totalPages: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -39,9 +66,9 @@ export default function SupplierPanel() {
   const updateOrder = async (id, api, body) => {
     try {
       await fetch(`${process.env.REACT_APP_API_URL}/api/supplier/${api}/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
       });
       message.success('操作成功');
       // 重新加载当前页面数据
@@ -108,10 +135,17 @@ export default function SupplierPanel() {
               bodyStyle={{ padding: 16 }}
             >
               <Space direction="vertical" style={{ width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>
                   {JSON.parse(order.items).map(item => 
                     `${item.name} x ${item.quantity} (￥${item.price.toFixed(2)})`
                   ).join(', ')}
+                  </div>
+                  {order.order_no && (
+                    <div style={{ fontSize: 12, color: '#999', background: '#f5f5f5', padding: '2px 8px', borderRadius: 4 }}>
+                      订单号: {order.order_no}
+                    </div>
+                  )}
                 </div>
                 <div style={{ color: '#666' }}>地址：{order.address}</div>
                 <div style={{ color: '#666' }}>联系人：{order.contact_name || '未填写'}</div>
@@ -140,10 +174,17 @@ export default function SupplierPanel() {
               bodyStyle={{ padding: 16 }}
             >
               <Space direction="vertical" style={{ width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ fontSize: 16, fontWeight: 500, color: '#222' }}>
                   {JSON.parse(order.items).map(item => 
                     `${item.name} x ${item.quantity} (￥${item.price.toFixed(2)})`
                   ).join(', ')}
+                  </div>
+                  {order.order_no && (
+                    <div style={{ fontSize: 12, color: '#999', background: '#f5f5f5', padding: '2px 8px', borderRadius: 4 }}>
+                      订单号: {order.order_no}
+                    </div>
+                  )}
                 </div>
                 <div style={{ color: '#666' }}>地址：{order.address}</div>
                 <div style={{ color: '#666' }}>联系人：{order.contact_name || '未填写'}</div>
