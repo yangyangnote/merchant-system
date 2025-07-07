@@ -89,20 +89,44 @@ app.get('/api/menu', async (req, res) => {
   }
 });
 
-// 订单API
+// 订单API - 支持分页
 app.get('/api/order', async (req, res) => {
-  const { userId } = req.query; // 从查询参数中获取商家ID
+  const { userId, page = 1, pageSize = 10 } = req.query;
+  
   try {
-    let query = 'SELECT id, items, address, phone, contact_name, userId, username, status FROM orders';
+    // 计算偏移量
+    const offset = (parseInt(page) - 1) * parseInt(pageSize);
+    const limit = parseInt(pageSize);
+    
+    // 构建基础查询
+    let baseQuery = 'FROM orders';
+    let whereClause = '';
     const params = [];
-
+    
     if (userId) {
-      query += ' WHERE userId = ?';
+      whereClause = ' WHERE userId = ?';
       params.push(userId);
     }
-
-    const [rows] = await pool.query(query, params);
-    res.json(rows);
+    
+    // 获取总数
+    const countQuery = `SELECT COUNT(*) as total ${baseQuery}${whereClause}`;
+    const [countResult] = await pool.query(countQuery, params);
+    const total = countResult[0].total;
+    
+    // 获取分页数据
+    const dataQuery = `SELECT id, items, address, phone, contact_name, userId, username, status ${baseQuery}${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`;
+    const [rows] = await pool.query(dataQuery, [...params, limit, offset]);
+    
+    // 返回分页信息
+    res.json({
+      data: rows,
+      pagination: {
+        current: parseInt(page),
+        pageSize: parseInt(pageSize),
+        total: total,
+        totalPages: Math.ceil(total / parseInt(pageSize))
+      }
+    });
   } catch (error) {
     console.error('获取订单失败:', error);
     res.status(500).json({ message: '服务器错误，无法获取订单' });
